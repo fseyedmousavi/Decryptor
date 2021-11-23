@@ -8,11 +8,15 @@
 
 int main(int argc, char *argv[]){
 	char str [400];
-	char str1[200], str2[100], str3[100];
+	static char str1[200], str2[100], str3[100];
 	int i, j;
 	int fd;
     	char * myfifo = "/tmp/myfifo"; 
-
+    	
+	// Creating the named file(FIFO)
+ 	// mkfifo(<pathname>, <permission>)
+	mkfifo(myfifo, 0666);
+	
 	printf("please enter the encrypted text:\n");
 	fgets(str, 400, stdin);
 
@@ -20,16 +24,6 @@ int main(int argc, char *argv[]){
 		if(str[i]=='#'){
 	    		strncpy(str1, &str[0],i);
     			str1[i] = '\0';
-    			
-   			// Creating the named file(FIFO)
-   			// mkfifo(<pathname>, <permission>)
-    			mkfifo(myfifo, 0666);
-    	
-        		// Open FIFO for write only
-        		fd = open(myfifo, O_WRONLY);
-	
-        		write(fd, str1, strlen(str1)+1);
-        		close(fd);
     			break;
 		}
 	}
@@ -55,18 +49,32 @@ int main(int argc, char *argv[]){
         	execvp("./decoder",args);
         	sleep(1);
 	} else {
+		// Open FIFO for write only
+        	fd = open(myfifo, O_WRONLY);
+	
+        	write(fd, str1, strlen(str1)+1);
+        	close(fd);
+	
 		sleep(1);
 		finder = fork();
 		if (finder == 0) {
 			char *args[]={"finder", "c", "programs" ,NULL};
         		execvp("./finder",args);
 		} else {
+    			fd = open(myfifo, O_WRONLY);
+        		write(fd, str2, strlen(str2)+1);
+        		close(fd);
+		
 			sleep(1);
 			placer = fork();
 			if (placer == 0) {
 				char *args[]={"placer", "c", "programs" ,NULL};
         			execvp("./placer",args);
 			} else {
+				fd = open(myfifo, O_WRONLY);
+				write(fd, str3, strlen(str3)+1);
+        			close(fd);
+        			
 				sleep(1);
 			}
 		}

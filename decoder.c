@@ -8,17 +8,29 @@
 int main(){
 	int fd1;
 	char * myfifo = "/tmp/myfifo";
-	char str1[80];
+	char str1[80];  //get this from main
 	
     	mkfifo(myfifo, 0666);
 
         //open in read only and read
         fd1 = open(myfifo,O_RDONLY);
         read(fd1, str1, 80);
+        
         close(fd1);
 
 	printf("Hello. I am decoder.\n");
     	printf("str1: %s\n", str1);
+    	
+    	strcat(str1, " edited");
+    	
+    	int fd;
+	char * myfifo2 = "/tmp/myfifo2";
+
+    	mkfifo(myfifo2, 0666);
+        fd = open(myfifo2,O_WRONLY);
+        write(fd, str1, 80);
+        close(fd1);
+        
 	sleep(1);
 	return 0;
 }
