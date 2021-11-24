@@ -31,7 +31,9 @@ int main(){
     				decrypted_str1[i]='Z';
     			}
     		}else if(str1[i]<'c'){
-    	    		if(str1[i]=='a'){
+    			if(str1[i]<'a'){
+    				decrypted_str1[i]=str1[i]-3;
+    			}else if(str1[i]=='a'){
     				decrypted_str1[i]='x';
     			}else if(str1[i]=='b'){
     				decrypted_str1[i]='y';
