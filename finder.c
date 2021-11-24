@@ -6,41 +6,38 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#define n 100
 int main(){
+
 	int fd2;
 	char * myfifo = "/tmp/myfifo";
-	char str2[80];  //get this from main
+	char str2[n];  //get this from main
 	
     	mkfifo(myfifo, 0666);
         fd2 = open(myfifo,O_RDONLY);
-        read(fd2, str2, 80);
+        read(fd2, str2, n);
         close(fd2);
 
-	printf("Hello. I am finder.\n");
+	printf("\nHello. I am finder.\n");
 	printf("str2: %s\n", str2);
 	
 	int fd;
 	char * myfifo2 = "/tmp/myfifo2";
-	char str_edited[80];  //get this from decoder
-	
+	char str_edited[n];  //get this from decoder
 	
     	mkfifo(myfifo2, 0666);
         fd = open(myfifo2,O_RDONLY);
-        read(fd, str_edited, 80);
+        read(fd, str_edited, n);
         close(fd);
-
-	printf("str: %s\n", str_edited);
+	printf("str_edited: %s\n", str_edited);
 	
 	int i = 0;
 
-	int output_len = 1;
-	char* output = malloc(sizeof(char));
-	if (output == NULL){
-		//failed to allocate the memory
-	}
+	char output[strlen(str_edited)];
+	strcpy(output, "");
 	
-	while(str2[i]!='\0'){
-		char ind[2];
+	while(i < strlen(str2)){
+		char ind[3];
 		int j = 0;
 		int index;
 		while(str2[i]!=' ') {
@@ -51,36 +48,47 @@ int main(){
 		index = atoi(ind);
 		
 		i++;
-		char len[2];
+		char len[10];
 		j = 0;
 		int length;
-		while(str2[i]!='$'){
+		while(str2[i] != '$' && i < strlen(str2)){
 			len[j]=str2[i];
 			i++;
 			j++;
 		}
 		length = atoi(len);
+
 		i++;
-		//resize output for next string and & to seperate them
-		output_len += (length + 1);
-		output = realloc(output, output_len * sizeof(char));
-		memcpy(output, &str2[index], str2[index+length]);
-		strcat(output, "&");
+			
+		char temp[10]={};
+		strncpy(temp, str_edited + index, length);
+		char c[2];
+		c[1] = '\0';
+		c[0] = '&';
+		strncat(temp, c, 1);
+		
+		strncat(output, temp, length+1);
 	}
+	FILE * file;
+    	file = fopen("./finder_output.txt", "w");
+	
+   	 if(file == NULL) {
+        	printf("finder was unable to create file.\n");
+        	exit(EXIT_FAILURE);
+    	}
+
+    	fputs(output, file);
+
+	fclose(file);
+	
 	printf("OUTPUT:%s\n",output);
-	FILE *finder_output = fopen("finder_output.txt", "w");
-	int results = fputs(output, finder_output);
-	if (results == EOF){
-		//failed to write error
-	}
 	
-	strcat(str_edited, "2");
-	
+
 	fd = open(myfifo2,O_WRONLY);
-        write(fd, str_edited, 80);
-        close(fd);	
-	free(output);
-	fclose(finder_output);
+        write(fd, output, n);
+        close(fd);
+
+	
 	
 	sleep(1);
 	return 0;
