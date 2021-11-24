@@ -22,6 +22,8 @@ int main(){
 	char * myfifo2 = "/tmp/myfifo2";
 	char str_edited[80];  //get this from finder
 	
+	
+	
     	mkfifo(myfifo2, 0666);
         fd = open(myfifo2,O_RDONLY);
         read(fd, str_edited, 80);
@@ -29,6 +31,31 @@ int main(){
 
 	printf("str: %s\n", str_edited);
 	
+	char output[strlen(str3)+strlen(str_edited)];
+	int i = -1;
+	int j = 0; //moves on output
+	int k = 0; //moves on str_edited
+	while (str3 != '\0'){
+		i++;
+		if (str3[i] == '$'){
+			while (str_edited[k]!='&'||str_edited[k]!='\0'){
+				strcat(output, &str_edited[k]);
+				i++;
+			}
+			
+		} else {
+			output[j]=str3[i];
+			j++;
+		}
+		
+	}
+	FILE *placer_output = fopen("placer_output.txt", "w");
+	int results = fputs(output, placer_output);
+	if (results == EOF){
+		//failed to write error
+	}
+	
+	fclose(placer_output);
 	sleep(1);
 	return 0;
 }
