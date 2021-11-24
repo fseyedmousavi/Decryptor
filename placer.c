@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 int main(){
 	int fd3;
@@ -14,45 +15,46 @@ int main(){
         fd3 = open(myfifo,O_RDONLY);
         read(fd3, str3, 80);
         close(fd3);
-
-	printf("Hello. I am placer.\n");
-	printf("str3: %s", str3);
 	
 	int fd;
 	char * myfifo2 = "/tmp/myfifo2";
 	char str_edited[80];  //get this from finder
 	
 	
-	
     	mkfifo(myfifo2, 0666);
         fd = open(myfifo2,O_RDONLY);
         read(fd, str_edited, 80);
         close(fd);
-
-	printf("str: %s\n", str_edited);
 	
 	char output[strlen(str3)+strlen(str_edited)];
-	int i = -1;
-	int j = 0; //moves on output
+	strcpy(output,"");
+	int i = 0; //moves on str3
 	int k = 0; //moves on str_edited
-	while (str3 != '\0'){
-		i++;
+	while (i < strlen(str3)){
 		if (str3[i] == '$'){
-			while (str_edited[k]!='&'||str_edited[k]!='\0'){
-				strcat(output, &str_edited[k]);
-				i++;
-			}
+		
+			int length = 0;
+			while (str_edited[k+length]!='&')
+				length++;
 			
-		} else {
-			output[j]=str3[i];
-			j++;
-		}
+			char temp[10]={};
+			strncpy(temp, str_edited + k, length);
+			strncat(output, temp, length);
+			
+			k+=length+1;
+			
+		} else
+			strncat(output, &str3[i], 1);
+		i++;
 		
 	}
+	printf("\n%s" , output);
 	FILE *placer_output = fopen("placer_output.txt", "w");
 	int results = fputs(output, placer_output);
 	if (results == EOF){
-		//failed to write error
+		//File not created hence exit
+        	printf("placer was unable to create file.\n");
+        	exit(EXIT_FAILURE);
 	}
 	
 	fclose(placer_output);

@@ -18,9 +18,6 @@ int main(){
         read(fd2, str2, n);
         close(fd2);
 
-	printf("\nHello. I am finder.\n");
-	printf("str2: %s\n", str2);
-	
 	int fd;
 	char * myfifo2 = "/tmp/myfifo2";
 	char str_edited[n];  //get this from decoder
@@ -29,7 +26,6 @@ int main(){
         fd = open(myfifo2,O_RDONLY);
         read(fd, str_edited, n);
         close(fd);
-	printf("str_edited: %s\n", str_edited);
 	
 	int i = 0;
 
@@ -40,7 +36,7 @@ int main(){
 		char ind[3];
 		int j = 0;
 		int index;
-		while(str2[i]!=' ') {
+		while(str2[i]!=' ' && i < strlen(str2)) {
 			ind[j]=str2[i];
 			i++;
 			j++;
@@ -62,9 +58,7 @@ int main(){
 			
 		char temp[10]={};
 		strncpy(temp, str_edited + index, length);
-		char c[2];
-		c[1] = '\0';
-		c[0] = '&';
+		char *c = "&";
 		strncat(temp, c, 1);
 		
 		strncat(output, temp, length+1);
@@ -81,9 +75,6 @@ int main(){
 
 	fclose(file);
 	
-	printf("OUTPUT:%s\n",output);
-	
-
 	fd = open(myfifo2,O_WRONLY);
         write(fd, output, n);
         close(fd);

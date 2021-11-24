@@ -19,9 +19,6 @@ int main(){
         
         close(fd1);
 
-	printf("Hello. I am decoder.\n");
-    	printf("str1: %s\n", str1);
-    	
     	char decrypted_str1[strlen(str1)];
     	
     	for(int i=0;i< strlen(str1);i++){
@@ -63,7 +60,6 @@ int main(){
     	fputs(decrypted_str1, file);
 
 	fclose(file);
-	printf("File created and saved successfully.\n");
     
     	
     	int fd;
